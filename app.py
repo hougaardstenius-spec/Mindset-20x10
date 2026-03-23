@@ -414,19 +414,30 @@ with tab_match:
         st.markdown("##### 📋 Log match")
         st.caption("Fast input. Clear diagnosis. One next focus.")
 
+        st.info("Rate based on what you did, not how you felt. Scale: 1–3 = weak · 4–6 = okay · 7–8 = strong · 9–10 = elite")
+
         st.markdown("")
         col_l, col_r = st.columns(2)
         with col_l:
-            focus = st.slider("🎯 Focus", 1, 10, 5)
-            reset = st.slider("🔄 Reset", 1, 10, 5)
-            pressure = st.slider("💎 Pressure handling", 1, 10, 5)
-            attention_control = st.slider("🧠 Attention control", 1, 10, 5)
-            recovery_speed = st.slider("⏱️ Recovery speed", 1, 10, 5)
+            focus = st.slider("🎯 Focus", 1, 10, 6,
+                help="How consistently you stayed present on the ball and situation. 1 = distracted · 5 = inconsistent · 10 = fully locked in every point")
+            reset = st.slider("🔄 Reset", 1, 10, 6,
+                help="How well you handled momentum shifts. 1 = stuck after mistakes · 5 = sometimes recover · 10 = immediate reset every time")
+            pressure = st.slider("💎 Pressure handling", 1, 10, 6,
+                help="How well you performed in key points. 1 = collapse under pressure · 5 = inconsistent · 10 = execute well in big moments")
+            attention_control = st.slider("🧠 Attention control", 1, 10, 6,
+                help="Ability to direct your attention deliberately. 1 = reactive mind · 5 = partly controlled · 10 = fully intentional focus")
+            recovery_speed = st.slider("⏱️ Recovery speed", 1, 10, 6,
+                help="How fast you returned to neutral after mistakes. 1 = multiple points to recover · 5 = slow recovery · 10 = reset within 1 point")
         with col_r:
-            margin = st.slider("📏 Margin", 1, 10, 5)
-            intensity = st.slider("🔥 Intensity", 1, 10, 5)
-            arousal_regulation = st.slider("💨 Arousal regulation", 1, 10, 5)
-            identity_alignment = st.slider("🪞 Identity alignment", 1, 10, 5)
+            margin = st.slider("📏 Margin", 1, 10, 6,
+                help="How safe and controlled your shot selection was. 1 = constant errors · 5 = mixed control · 10 = very few free errors")
+            intensity = st.slider("🔥 Intensity", 1, 10, 6,
+                help="Your overall competitive energy and presence. 1 = flat · 5 = okay energy · 10 = fully engaged and sharp")
+            arousal_regulation = st.slider("💨 Arousal regulation", 1, 10, 6,
+                help="How well you managed your energy level. 1 = too flat or too rushed · 5 = mixed · 10 = right energy for the situation")
+            identity_alignment = st.slider("🪞 Identity alignment", 1, 10, 6,
+                help="How well you played according to your standard. 1 = far from your standard · 5 = mixed · 10 = fully your game regardless of opponent")
             too_aggressive = st.toggle("⚡ Played too aggressive?", value=False)
 
         note = st.text_input(
