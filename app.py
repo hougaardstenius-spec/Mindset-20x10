@@ -240,146 +240,208 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Input form ──────────────────────────────────────────────────────────────
-with st.container(border=True):
-    st.markdown("##### 📋 Log match")
-    st.caption("Rate the match quickly. The goal is clarity, not perfection.")
+# ── Navigation tabs ─────────────────────────────────────────────────────────
+tab_match, tab_drills = st.tabs(["📋 Log match", "🎯 Pressure Training"])
 
-    st.markdown("")
-    col_l, col_r = st.columns(2)
-    with col_l:
-        focus = st.slider("🎯 Focus", 1, 10, 5)
-        reset = st.slider("🔄 Reset", 1, 10, 5)
-        pressure = st.slider("💎 Pressure handling", 1, 10, 5)
-    with col_r:
-        margin = st.slider("📏 Margin", 1, 10, 5)
-        intensity = st.slider("🔥 Intensity", 1, 10, 5)
-        too_aggressive = st.toggle("⚡ Played too aggressive?", value=False)
+# ── Tab 1: Log match ───────────────────────────────────────────────────────
+with tab_match:
+    with st.container(border=True):
+        st.markdown("##### 📋 Log match")
+        st.caption("Rate the match quickly. The goal is clarity, not perfection.")
 
-    note = st.text_input(
-        "📝 Optional note", placeholder="Example: Lost focus when ahead"
-    )
+        st.markdown("")
+        col_l, col_r = st.columns(2)
+        with col_l:
+            focus = st.slider("🎯 Focus", 1, 10, 5)
+            reset = st.slider("🔄 Reset", 1, 10, 5)
+            pressure = st.slider("💎 Pressure handling", 1, 10, 5)
+        with col_r:
+            margin = st.slider("📏 Margin", 1, 10, 5)
+            intensity = st.slider("🔥 Intensity", 1, 10, 5)
+            too_aggressive = st.toggle("⚡ Played too aggressive?", value=False)
 
-    st.markdown("")
-    if st.button("Analyze  →", use_container_width=True, type="primary"):
-        st.session_state.result = analyze_match(
-            focus=focus,
-            margin=margin,
-            reset=reset,
-            intensity=intensity,
-            pressure=pressure,
-            too_aggressive=too_aggressive,
-            note=note,
+        note = st.text_input(
+            "📝 Optional note", placeholder="Example: Lost focus when ahead"
         )
 
-# ── Results ─────────────────────────────────────────────────────────────────
-result = st.session_state.result
-if result:
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    st.markdown("##### 📊 Match result")
+        st.markdown("")
+        if st.button("Analyze  →", use_container_width=True, type="primary"):
+            st.session_state.result = analyze_match(
+                focus=focus,
+                margin=margin,
+                reset=reset,
+                intensity=intensity,
+                pressure=pressure,
+                too_aggressive=too_aggressive,
+                note=note,
+            )
 
-    # Score cards
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(
-            f"""
-            <div class="score-card">
-                <div class="label">Mental Score Index</div>
-                <div class="value">{result.mental_score_index}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with col2:
-        st.markdown(
-            f"""
-            <div class="score-card">
-                <div class="label">Pressure Score</div>
-                <div class="value">{result.pressure_score}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    # ── Results ─────────────────────────────────────────────────────────────
+    result = st.session_state.result
+    if result:
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        st.markdown("##### 📊 Match result")
 
-    st.markdown("")
+        # Score cards
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(
+                f"""
+                <div class="score-card">
+                    <div class="label">Mental Score Index</div>
+                    <div class="value">{result.mental_score_index}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col2:
+            st.markdown(
+                f"""
+                <div class="score-card">
+                    <div class="label">Pressure Score</div>
+                    <div class="value">{result.pressure_score}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-    # Biggest leak & next focus
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.markdown(
-            f"""
-            <div class="info-card leak">
-                <div class="card-title">🚨 Biggest leak</div>
-                <div class="card-body">{result.biggest_leak}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with col_b:
+        st.markdown("")
+
+        # Biggest leak & next focus
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown(
+                f"""
+                <div class="info-card leak">
+                    <div class="card-title">🚨 Biggest leak</div>
+                    <div class="card-body">{result.biggest_leak}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col_b:
+            st.markdown(
+                f"""
+                <div class="info-card">
+                    <div class="card-title">🎯 Next match focus</div>
+                    <div class="card-body">{result.next_focus}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # Coach feedback
         st.markdown(
             f"""
             <div class="info-card">
-                <div class="card-title">🎯 Next match focus</div>
-                <div class="card-body">{result.next_focus}</div>
+                <div class="card-title">🗣️ Coach feedback</div>
+                <div class="card-body">{result.feedback.replace(chr(10), '<br>')}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    # Coach feedback
+        # Profile bar chart
+        st.markdown("")
+        st.markdown("##### 📈 Performance profile")
+        chart_df = pd.DataFrame(
+            {"Category": list(result.profile.keys()), "Score": list(result.profile.values())}
+        )
+        chart = (
+            alt.Chart(chart_df)
+            .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6, color="#00E676")
+            .encode(
+                x=alt.X("Category:N", sort=list(result.profile.keys()), title=None),
+                y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 10]), title="Score"),
+            )
+            .properties(height=260)
+            .configure_axis(
+                labelColor="#888",
+                titleColor="#888",
+                gridColor="#2A3040",
+            )
+            .configure_view(strokeWidth=0)
+        )
+        st.altair_chart(chart, use_container_width=True)
+
+        # Insights & strengths side by side
+        col_ins, col_str = st.columns(2)
+        with col_ins:
+            st.markdown("##### ⚠️ Insights")
+            if result.insights:
+                pills = "".join(
+                    f'<span class="pill-red">{i}</span>' for i in result.insights
+                )
+                st.markdown(pills, unsafe_allow_html=True)
+        with col_str:
+            st.markdown("##### ✅ Strengths")
+            if result.strengths:
+                pills = "".join(
+                    f'<span class="pill-green">{s}</span>' for s in result.strengths
+                )
+                st.markdown(pills, unsafe_allow_html=True)
+            else:
+                st.caption(
+                    "No clear strength signal yet. Keep logging matches."
+                )
+
+        st.markdown("")
+        st.info("💡 Rule: only bring **one** focus point into the next match.")
+
+# ── Tab 2: Pressure Training ───────────────────────────────────────────────
+with tab_drills:
+    st.markdown("##### 🎯 Pressure Training")
+    st.caption("Train specific match situations. Check off drills as you complete them.")
+
+    st.markdown("")
+
+    # Closing situations
+    with st.container(border=True):
+        st.markdown("**🔴 Closing situations**")
+        c1 = st.checkbox("Close match (5-3)")
+        c2 = st.checkbox("Match point (no errors first 3 shots)")
+        c3 = st.checkbox("Serve for match (safe play only)")
+        c4 = st.checkbox("Close game at 40-30")
+
+    # High pressure points
+    with st.container(border=True):
+        st.markdown("**🟡 High pressure points**")
+        p1 = st.checkbox("Deuce (40-40)")
+        p2 = st.checkbox("Break point against you")
+        p3 = st.checkbox("Break point for you")
+        p4 = st.checkbox("Tie-break simulation")
+
+    # Error control
+    with st.container(border=True):
+        st.markdown("**🟢 Error control**")
+        e1 = st.checkbox("Reset immediately after error")
+        e2 = st.checkbox("Stop error streak (3 in a row)")
+        e3 = st.checkbox("No frustration game")
+        e4 = st.checkbox("Same routine every point")
+
+    # Discipline / focus
+    with st.container(border=True):
+        st.markdown("**🔵 Discipline / focus**")
+        d1 = st.checkbox("10 shots without error")
+        d2 = st.checkbox("Crosscourt only")
+        d3 = st.checkbox("No winners for one game")
+        d4 = st.checkbox("Long rally discipline")
+
+    completed = sum([c1, c2, c3, c4, p1, p2, p3, p4, e1, e2, e3, e4, d1, d2, d3, d4])
+
+    st.markdown("")
     st.markdown(
         f"""
-        <div class="info-card">
-            <div class="card-title">🗣️ Coach feedback</div>
-            <div class="card-body">{result.feedback.replace(chr(10), '<br>')}</div>
+        <div class="score-card">
+            <div class="label">Drills completed</div>
+            <div class="value">{completed}/16</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
-    # Profile bar chart
     st.markdown("")
-    st.markdown("##### 📈 Performance profile")
-    chart_df = pd.DataFrame(
-        {"Category": list(result.profile.keys()), "Score": list(result.profile.values())}
-    )
-    chart = (
-        alt.Chart(chart_df)
-        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6, color="#00E676")
-        .encode(
-            x=alt.X("Category:N", sort=list(result.profile.keys()), title=None),
-            y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 10]), title="Score"),
-        )
-        .properties(height=260)
-        .configure_axis(
-            labelColor="#888",
-            titleColor="#888",
-            gridColor="#2A3040",
-        )
-        .configure_view(strokeWidth=0)
-    )
-    st.altair_chart(chart, use_container_width=True)
 
-    # Insights & strengths side by side
-    col_ins, col_str = st.columns(2)
-    with col_ins:
-        st.markdown("##### ⚠️ Insights")
-        if result.insights:
-            pills = "".join(
-                f'<span class="pill-red">{i}</span>' for i in result.insights
-            )
-            st.markdown(pills, unsafe_allow_html=True)
-    with col_str:
-        st.markdown("##### ✅ Strengths")
-        if result.strengths:
-            pills = "".join(
-                f'<span class="pill-green">{s}</span>' for s in result.strengths
-            )
-            st.markdown(pills, unsafe_allow_html=True)
-        else:
-            st.caption(
-                "No clear strength signal yet. Keep logging matches."
-            )
-
-    st.markdown("")
-    st.info("💡 Rule: only bring **one** focus point into the next match.")
+    if completed >= 10:
+        st.success("🔥 High level mental session!")
+    elif completed >= 5:
+        st.info("💪 Solid training session")
