@@ -2,6 +2,7 @@ import streamlit as st
 from dataclasses import dataclass
 from typing import List, Dict
 import pandas as pd
+import altair as alt
 
 st.set_page_config(page_title="Mindset 20x10", page_icon="🎾", layout="centered")
 
@@ -342,8 +343,22 @@ if result:
     chart_df = pd.DataFrame(
         {"Category": list(result.profile.keys()), "Score": list(result.profile.values())}
     )
-    chart_df = chart_df.set_index("Category")
-    st.bar_chart(chart_df, color="#00E676")
+    chart = (
+        alt.Chart(chart_df)
+        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6, color="#00E676")
+        .encode(
+            x=alt.X("Category:N", sort=list(result.profile.keys()), title=None),
+            y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 10]), title="Score"),
+        )
+        .properties(height=260)
+        .configure_axis(
+            labelColor="#888",
+            titleColor="#888",
+            gridColor="#2A3040",
+        )
+        .configure_view(strokeWidth=0)
+    )
+    st.altair_chart(chart, use_container_width=True)
 
     # Insights & strengths side by side
     col_ins, col_str = st.columns(2)
