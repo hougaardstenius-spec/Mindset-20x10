@@ -1,6 +1,8 @@
 import streamlit as st
 from dataclasses import dataclass
 from typing import List, Dict
+from statistics import mean
+from datetime import date
 import pandas as pd
 import altair as alt
 
@@ -96,6 +98,18 @@ st.markdown(
         font-size: 0.85rem;
     }
 
+    /* ── Drill pill ────────────────────────────────────── */
+    .pill-blue {
+        display: inline-block;
+        background: rgba(66,165,245,0.10);
+        color: #90CAF9;
+        border: 1px solid rgba(66,165,245,0.2);
+        border-radius: 20px;
+        padding: 0.35rem 0.9rem;
+        margin: 0.2rem 0.3rem 0.2rem 0;
+        font-size: 0.85rem;
+    }
+
     /* ── Slider labels ─────────────────────────────────── */
     .stSlider label { font-weight: 600; letter-spacing: 0.3px; }
 
@@ -111,17 +125,201 @@ st.markdown(
 )
 
 
+# ── Pressure drill data ────────────────────────────────────────────────────
+PRESSURE_DRILLS = {
+    "Closing": [
+        "Close match from 5-3",
+        "Close game from 40-30",
+        "Match point, no free errors",
+        "Serve for match",
+    ],
+    "High Pressure Points": [
+        "Deuce battle",
+        "Break point for you",
+        "Break point against you",
+        "Tie-break simulation",
+    ],
+    "Error Control": [
+        "Reset after error within 1 point",
+        "Break 3-error spiral",
+        "Same cue after every mistake",
+        "No frustration game",
+    ],
+    "Discipline / Boredom": [
+        "10 shots without error",
+        "Crosscourt only for one game",
+        "No winners for one game",
+        "Long rally discipline",
+    ],
+    "Attention Control": [
+        "Split-step anchor drill",
+        "Contact-point focus drill",
+        "One external cue for full game",
+        "Refocus after distraction",
+    ],
+    "Arousal Regulation": [
+        "Raise energy before easy match",
+        "Calm down before closing",
+        "Breath reset before serve",
+        "Body-language reset drill",
+    ],
+    "Identity": [
+        "No free points challenge",
+        "Play one full game to identity",
+        "Identity cue before key points",
+        "Return to standard after momentum shift",
+    ],
+    "Recovery Speed": [
+        "Next-ball response drill",
+        "Miss and reset within 1 point",
+        "Fast reset after partner error",
+        "Recover after lost deuce",
+    ],
+}
+
+DRILL_MAP = {
+    "Recovery speed": PRESSURE_DRILLS["Recovery Speed"][:3],
+    "Attention control": PRESSURE_DRILLS["Attention Control"][:3],
+    "Pressure handling": PRESSURE_DRILLS["High Pressure Points"][:3],
+    "Identity alignment": PRESSURE_DRILLS["Identity"][:3],
+    "Arousal regulation": PRESSURE_DRILLS["Arousal Regulation"][:3],
+    "Margin discipline": PRESSURE_DRILLS["Discipline / Boredom"][:3],
+    "Overaggression": [
+        "Crosscourt only for one game",
+        "No winners for one game",
+        "Match point, no free errors",
+    ],
+    "Intensity": PRESSURE_DRILLS["Arousal Regulation"][:3],
+}
+
+
 # ── Data model ──────────────────────────────────────────────────────────────
 @dataclass
 class AnalysisResult:
     mental_score_index: float
     pressure_score: float
+    identity_score: float
     biggest_leak: str
     next_focus: str
-    feedback: str
+    coach_feedback: str
     insights: List[str]
     strengths: List[str]
+    recommended_drills: List[str]
     profile: Dict[str, int]
+
+
+# ── Analysis helpers ────────────────────────────────────────────────────────
+def avg(values: List[float]) -> float:
+    return round(mean(values), 2)
+
+
+def get_decision_quality(too_aggressive: bool) -> int:
+    return 4 if too_aggressive else 8
+
+
+def detect_biggest_leak(scores: Dict[str, int], too_aggressive: bool) -> str:
+    if too_aggressive and scores["margin"] <= 6:
+        return "Overaggression"
+    priority_order = [
+        "recovery_speed",
+        "attention_control",
+        "pressure",
+        "identity_alignment",
+        "arousal_regulation",
+        "margin",
+        "intensity",
+        "reset",
+        "focus",
+    ]
+    label_map = {
+        "recovery_speed": "Recovery speed",
+        "attention_control": "Attention control",
+        "pressure": "Pressure handling",
+        "identity_alignment": "Identity alignment",
+        "arousal_regulation": "Arousal regulation",
+        "margin": "Margin discipline",
+        "intensity": "Intensity",
+        "reset": "Reset quality",
+        "focus": "General focus",
+    }
+    lowest_value = min(scores[key] for key in priority_order)
+    for key in priority_order:
+        if scores[key] == lowest_value:
+            return label_map[key]
+    return "General focus"
+
+
+def get_recommended_drills(biggest_leak: str) -> List[str]:
+    return DRILL_MAP.get(biggest_leak, PRESSURE_DRILLS["Error Control"][:3])
+
+
+def generate_feedback(
+    scores: Dict[str, int], biggest_leak: str, too_aggressive: bool, note: str
+) -> tuple:
+    insights: List[str] = []
+    strengths: List[str] = []
+
+    if scores["attention_control"] <= 6:
+        insights.append("Your attention drifts too easily during parts of the match.")
+    if scores["recovery_speed"] <= 6:
+        insights.append("You stay inside errors too long before resetting.")
+    if scores["pressure"] <= 6:
+        insights.append("Your level drops in key moments or when closing.")
+    if scores["arousal_regulation"] <= 6:
+        insights.append("Your energy level is not regulated well enough for the situation.")
+    if scores["identity_alignment"] <= 6:
+        insights.append("You moved away from your performance identity under pressure.")
+    if too_aggressive:
+        insights.append("You accelerate before the point is ready.")
+    if scores["margin"] <= 6:
+        insights.append("Your safety margin is too low in neutral rallies.")
+
+    if scores["attention_control"] >= 7:
+        strengths.append("Good attentional control")
+    if scores["recovery_speed"] >= 7:
+        strengths.append("Fast recovery after mistakes")
+    if scores["pressure"] >= 7:
+        strengths.append("You handle pressure well")
+    if scores["identity_alignment"] >= 7:
+        strengths.append("You stay close to your performance identity")
+    if scores["margin"] >= 7:
+        strengths.append("Strong margin discipline")
+
+    if biggest_leak == "Overaggression":
+        next_focus = "Play crosscourt with margin before you accelerate"
+        coach_feedback = "Your main issue is not courage but timing. Build the point longer and earn the right to attack."
+    elif biggest_leak == "Recovery speed":
+        next_focus = "Reset within one point after every error"
+        coach_feedback = "Your performance drops because recovery is too slow. Use the same reset cue every time and get back to the next ball faster."
+    elif biggest_leak == "Attention control":
+        next_focus = "Use one external attention anchor next match"
+        coach_feedback = "Your mind is drifting. Anchor attention to split step, contact point, or target instead of trying to control thoughts."
+    elif biggest_leak == "Pressure handling":
+        next_focus = "Slow down and play control first in key moments"
+        coach_feedback = "You lose quality when it matters. Reduce speed, increase clarity, and finish only when the ball is clearly there."
+    elif biggest_leak == "Identity alignment":
+        next_focus = "Return to your standard under pressure"
+        coach_feedback = "You are strongest when you play like your identity. Reconnect to your standard before key points."
+    elif biggest_leak == "Arousal regulation":
+        next_focus = "Regulate your energy before key moments"
+        coach_feedback = "You are either too flat or too rushed. Use breath, feet, and body language to get to the right activation level."
+    elif biggest_leak == "Margin discipline":
+        next_focus = "Add more safety margin in neutral play"
+        coach_feedback = "You are giving away too much for free. Use height, direction, and patience to make the match simpler."
+    elif biggest_leak == "Intensity":
+        next_focus = "Bring more competitive energy into the match"
+        coach_feedback = "Your body and mind are not switched on enough. Use sharper feet and stronger intent from the first point."
+    else:
+        next_focus = "Keep your current structure and reinforce it"
+        coach_feedback = "The profile is solid. Stay disciplined and keep repeating the same high-quality process."
+
+    if not insights:
+        insights.append("No major leak detected. Keep reinforcing your current structure.")
+
+    if note.strip():
+        coach_feedback += f"\n\nMatch note: {note.strip()}"
+
+    return next_focus, coach_feedback, insights[:3], strengths[:3]
 
 
 # ── Analysis engine ─────────────────────────────────────────────────────────
@@ -131,96 +329,61 @@ def analyze_match(
     reset: int,
     intensity: int,
     pressure: int,
+    attention_control: int,
+    arousal_regulation: int,
+    recovery_speed: int,
+    identity_alignment: int,
     too_aggressive: bool,
     note: str,
 ) -> AnalysisResult:
-    mental_score_index = round((focus + margin + reset + intensity) / 4, 1)
-    decision_quality = 4 if too_aggressive else 8
-    pressure_score = round((pressure + reset + decision_quality) / 3, 1)
+    decision_quality = get_decision_quality(too_aggressive)
+    mental_score_index = avg([
+        focus, margin, reset, intensity, attention_control, recovery_speed,
+    ])
+    pressure_score = avg([
+        pressure, recovery_speed, arousal_regulation, identity_alignment, decision_quality,
+    ])
+    identity_score = avg([
+        identity_alignment, margin, attention_control, reset,
+    ])
 
-    leak_candidates = {
-        "Attention loss": focus,
-        "Too risky in neutral rallies": margin,
-        "Slow recovery after errors": reset,
-        "Low competitive intensity": intensity,
-        "Poor pressure handling": pressure,
+    scores = {
+        "focus": focus,
+        "margin": margin,
+        "reset": reset,
+        "intensity": intensity,
+        "pressure": pressure,
+        "attention_control": attention_control,
+        "arousal_regulation": arousal_regulation,
+        "recovery_speed": recovery_speed,
+        "identity_alignment": identity_alignment,
     }
-    biggest_leak = (
-        "Overaggression"
-        if too_aggressive
-        else min(leak_candidates, key=leak_candidates.get)
+    biggest_leak = detect_biggest_leak(scores, too_aggressive)
+    recommended_drills = get_recommended_drills(biggest_leak)
+    next_focus, coach_feedback, insights, strengths = generate_feedback(
+        scores=scores, biggest_leak=biggest_leak,
+        too_aggressive=too_aggressive, note=note,
     )
-
-    insights: List[str] = []
-    strengths: List[str] = []
-
-    if too_aggressive:
-        insights.append("You force too much when the point is not ready.")
-    if focus <= 6:
-        insights.append("Your attention drifts too easily during parts of the match.")
-    if reset <= 6:
-        insights.append("Your recovery after mistakes is costing you momentum.")
-    if pressure <= 6:
-        insights.append("Your level drops in key moments or when closing.")
-    if intensity <= 6:
-        insights.append("You are not fully switched on throughout the match.")
-    if margin <= 6:
-        insights.append("Your safety margin is too low in neutral rallies.")
-
-    if focus >= 7:
-        strengths.append("Good attentional control")
-    if margin >= 7:
-        strengths.append("Strong margin discipline")
-    if reset >= 7:
-        strengths.append("Fast reset after errors")
-    if intensity >= 7:
-        strengths.append("Competitive intensity is solid")
-    if pressure >= 7:
-        strengths.append("You handle pressure well")
-
-    if too_aggressive or margin <= 4:
-        next_focus = "Play crosscourt with margin"
-        feedback = "You are forcing too much. Build the point longer before you accelerate."
-    elif reset <= 4:
-        next_focus = "Reset faster after errors"
-        feedback = "Your recovery speed is costing you points. Use the same reset cue after every miss."
-    elif focus <= 4:
-        next_focus = "Anchor attention to the next ball"
-        feedback = "Your attention is drifting. Use one external anchor: split step, ball contact, or target."
-    elif pressure <= 4:
-        next_focus = "Slow down when closing"
-        feedback = "You lose quality under pressure. Play control first, finish only when the ball is clearly there."
-    elif intensity <= 4:
-        next_focus = "Bring more energy into easy matches"
-        feedback = "Your arousal drops when the match feels too comfortable. Use body language and faster feet to stay switched on."
-    else:
-        next_focus = "Keep your current structure"
-        feedback = "Solid profile. Stay disciplined and avoid changing a winning process."
-
-    if not insights:
-        insights.append(
-            "No major leak detected. Keep reinforcing your current structure."
-        )
-
     profile = {
         "Focus": focus,
         "Margin": margin,
         "Reset": reset,
-        "Intensity": intensity,
         "Pressure": pressure,
+        "Attention": attention_control,
+        "Arousal": arousal_regulation,
+        "Recovery": recovery_speed,
+        "Identity": identity_alignment,
     }
-
-    if note.strip():
-        feedback += f"\n\nMatch note: {note.strip()}"
-
     return AnalysisResult(
         mental_score_index=mental_score_index,
         pressure_score=pressure_score,
+        identity_score=identity_score,
         biggest_leak=biggest_leak,
         next_focus=next_focus,
-        feedback=feedback,
-        insights=insights[:3],
-        strengths=strengths[:3],
+        coach_feedback=coach_feedback,
+        insights=insights,
+        strengths=strengths,
+        recommended_drills=recommended_drills,
         profile=profile,
     )
 
@@ -231,23 +394,25 @@ if "result" not in st.session_state:
 
 # ── Hero ────────────────────────────────────────────────────────────────────
 st.markdown(
-    """
+    f"""
     <div class="hero">
         <h1>🎾 Mindset <span class="accent">20x10</span></h1>
-        <p>Mental performance tracking for padel</p>
+        <p>Mental performance system for padel &bull; {date.today().isoformat()}</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
 # ── Navigation tabs ─────────────────────────────────────────────────────────
-tab_match, tab_drills = st.tabs(["📋 Log match", "🎯 Pressure Training"])
+tab_match, tab_drills, tab_history = st.tabs(
+    ["📋 Log match", "🎯 Pressure Training", "📜 History"]
+)
 
 # ── Tab 1: Log match ───────────────────────────────────────────────────────
 with tab_match:
     with st.container(border=True):
         st.markdown("##### 📋 Log match")
-        st.caption("Rate the match quickly. The goal is clarity, not perfection.")
+        st.caption("Fast input. Clear diagnosis. One next focus.")
 
         st.markdown("")
         col_l, col_r = st.columns(2)
@@ -255,9 +420,13 @@ with tab_match:
             focus = st.slider("🎯 Focus", 1, 10, 5)
             reset = st.slider("🔄 Reset", 1, 10, 5)
             pressure = st.slider("💎 Pressure handling", 1, 10, 5)
+            attention_control = st.slider("🧠 Attention control", 1, 10, 5)
+            recovery_speed = st.slider("⏱️ Recovery speed", 1, 10, 5)
         with col_r:
             margin = st.slider("📏 Margin", 1, 10, 5)
             intensity = st.slider("🔥 Intensity", 1, 10, 5)
+            arousal_regulation = st.slider("💨 Arousal regulation", 1, 10, 5)
+            identity_alignment = st.slider("🪞 Identity alignment", 1, 10, 5)
             too_aggressive = st.toggle("⚡ Played too aggressive?", value=False)
 
         note = st.text_input(
@@ -272,6 +441,10 @@ with tab_match:
                 reset=reset,
                 intensity=intensity,
                 pressure=pressure,
+                attention_control=attention_control,
+                arousal_regulation=arousal_regulation,
+                recovery_speed=recovery_speed,
+                identity_alignment=identity_alignment,
                 too_aggressive=too_aggressive,
                 note=note,
             )
@@ -282,13 +455,13 @@ with tab_match:
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         st.markdown("##### 📊 Match result")
 
-        # Score cards
-        col1, col2 = st.columns(2)
+        # Score cards — 3 columns
+        col1, col2, col3 = st.columns(3)
         with col1:
             st.markdown(
                 f"""
                 <div class="score-card">
-                    <div class="label">Mental Score Index</div>
+                    <div class="label">Mental Score</div>
                     <div class="value">{result.mental_score_index}</div>
                 </div>
                 """,
@@ -300,6 +473,16 @@ with tab_match:
                 <div class="score-card">
                     <div class="label">Pressure Score</div>
                     <div class="value">{result.pressure_score}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col3:
+            st.markdown(
+                f"""
+                <div class="score-card">
+                    <div class="label">Identity Score</div>
+                    <div class="value">{result.identity_score}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -335,9 +518,19 @@ with tab_match:
             f"""
             <div class="info-card">
                 <div class="card-title">🗣️ Coach feedback</div>
-                <div class="card-body">{result.feedback.replace(chr(10), '<br>')}</div>
+                <div class="card-body">{result.coach_feedback.replace(chr(10), '<br>')}</div>
             </div>
             """,
+            unsafe_allow_html=True,
+        )
+
+        # Recommended drills
+        st.markdown(
+            '<div class="info-card">'
+            '<div class="card-title">🏋️ Recommended drills</div>'
+            '<div class="card-body">'
+            + "".join(f'<span class="pill-blue">{d}</span>' for d in result.recommended_drills)
+            + "</div></div>",
             unsafe_allow_html=True,
         )
 
@@ -391,57 +584,77 @@ with tab_match:
 # ── Tab 2: Pressure Training ───────────────────────────────────────────────
 with tab_drills:
     st.markdown("##### 🎯 Pressure Training")
-    st.caption("Train specific match situations. Check off drills as you complete them.")
+    st.caption("Check off the drills you completed today.")
+
+    # Show recommended category if a match has been analyzed
+    recommended_category = "Error Control"
+    result_for_drills = st.session_state.get("result")
+    if result_for_drills:
+        recommended_category = {
+            "Recovery speed": "Recovery Speed",
+            "Attention control": "Attention Control",
+            "Pressure handling": "High Pressure Points",
+            "Identity alignment": "Identity",
+            "Arousal regulation": "Arousal Regulation",
+            "Margin discipline": "Discipline / Boredom",
+            "Overaggression": "Discipline / Boredom",
+            "Intensity": "Arousal Regulation",
+        }.get(result_for_drills.biggest_leak, "Error Control")
+
+    st.markdown(
+        f"""
+        <div class="info-card">
+            <div class="card-title">📌 Recommended category today</div>
+            <div class="card-body">{recommended_category}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown("")
+    completed_drills: List[str] = []
+    for category, drills in PRESSURE_DRILLS.items():
+        with st.expander(category, expanded=(category == recommended_category)):
+            for drill in drills:
+                key = f"drill_{category}_{drill}"
+                if st.checkbox(drill, key=key):
+                    completed_drills.append(f"{category}: {drill}")
 
-    # Closing situations
-    with st.container(border=True):
-        st.markdown("**🔴 Closing situations**")
-        c1 = st.checkbox("Close match (5-3)")
-        c2 = st.checkbox("Match point (no errors first 3 shots)")
-        c3 = st.checkbox("Serve for match (safe play only)")
-        c4 = st.checkbox("Close game at 40-30")
-
-    # High pressure points
-    with st.container(border=True):
-        st.markdown("**🟡 High pressure points**")
-        p1 = st.checkbox("Deuce (40-40)")
-        p2 = st.checkbox("Break point against you")
-        p3 = st.checkbox("Break point for you")
-        p4 = st.checkbox("Tie-break simulation")
-
-    # Error control
-    with st.container(border=True):
-        st.markdown("**🟢 Error control**")
-        e1 = st.checkbox("Reset immediately after error")
-        e2 = st.checkbox("Stop error streak (3 in a row)")
-        e3 = st.checkbox("No frustration game")
-        e4 = st.checkbox("Same routine every point")
-
-    # Discipline / focus
-    with st.container(border=True):
-        st.markdown("**🔵 Discipline / focus**")
-        d1 = st.checkbox("10 shots without error")
-        d2 = st.checkbox("Crosscourt only")
-        d3 = st.checkbox("No winners for one game")
-        d4 = st.checkbox("Long rally discipline")
-
-    completed = sum([c1, c2, c3, c4, p1, p2, p3, p4, e1, e2, e3, e4, d1, d2, d3, d4])
+    completed_count = len(completed_drills)
 
     st.markdown("")
     st.markdown(
         f"""
         <div class="score-card">
             <div class="label">Drills completed</div>
-            <div class="value">{completed}/16</div>
+            <div class="value">{completed_count}/{sum(len(d) for d in PRESSURE_DRILLS.values())}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
     st.markdown("")
 
-    if completed >= 10:
+    if completed_count >= 10:
         st.success("🔥 High level mental session!")
-    elif completed >= 5:
+    elif completed_count >= 5:
         st.info("💪 Solid training session")
+    elif completed_count > 0:
+        st.caption("Good start. Consistency matters more than volume.")
+
+    if completed_drills:
+        with st.container(border=True):
+            st.markdown("**Completed drills**")
+            for drill in completed_drills:
+                st.write(f"- {drill}")
+
+# ── Tab 3: History ──────────────────────────────────────────────────────────
+with tab_history:
+    st.markdown("##### 📜 History")
+    st.caption("History and storage come in the next build.")
+
+    with st.container(border=True):
+        st.markdown("**Coming soon:**")
+        st.write("- Last 5 matches")
+        st.write("- Average scores")
+        st.write("- Most frequent leaks")
+        st.write("- Drills completed this week")
