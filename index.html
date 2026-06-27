@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mindset 20x10</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #080a0e;
+  --surface: #10131a;
+  --surface2: #181d27;
+  --border: #232b38;
+  --green: #00ff87;
+  --green2: #00cc6a;
+  --green-glow: rgba(0,255,135,0.18);
+  --green-dim: rgba(0,255,135,0.08);
+  --cyan: #00e5ff;
+  --amber: #ffcc00;
+  --red: #ff3d5a;
+  --purple: #9d4edd;
+  --text: #eef2f8;
+  --text-muted: #5a6478;
+  --text-dim: #8a96aa;
+  --radius: 12px;
+}
+
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+/* Animated background grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,255,135,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,135,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+#app { max-width: 680px; margin: 0 auto; padding: 0 16px 100px; position: relative; z-index: 1; }
+
+/* ── HEADER ──────────────────────────────────────────── */
+.header { padding: 28px 0 0; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.logo { display: flex; align-items: baseline; gap: 6px; }
+.logo-main { font-size: 22px; font-weight: 800; letter-spacing: -1px; color: var(--text); }
+.logo-main span { color: var(--green); }
+.logo-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+
+/* XP bar hero */
+.xp-hero { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 6px; position: relative; overflow: hidden; }
+.xp-hero::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, var(--green), var(--cyan)); }
+.xp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.level-badge { display: flex; align-items: center; gap: 8px; }
+.level-icon { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--cyan)); display: flex; align-items: center; justify-content: font-size:16px; justify-content: center; font-size: 16px; box-shadow: 0 0 16px var(--green-glow); flex-shrink:0; }
+.level-info { }
+.level-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.level-num { font-size: 11px; color: var(--text-muted); }
+.xp-numbers { text-align: right; }
+.xp-val { font-size: 18px; font-weight: 800; color: var(--green); letter-spacing: -0.5px; }
+.xp-label { font-size: 11px; color: var(--text-muted); }
+.xp-bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.xp-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--green), var(--cyan)); transition: width 0.8s cubic-bezier(.22,1,.36,1); }
+
+/* Streak + stats pills */
+.meta-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.meta-pill { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.meta-pill-icon { font-size: 18px; }
+.meta-pill-val { font-size: 16px; font-weight: 800; color: var(--text); }
+.meta-pill-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.streak-pill { border-color: rgba(255,204,0,0.3); }
+.streak-pill .meta-pill-val { color: var(--amber); }
+
+/* ── TABS ─────────────────────────────────────────────── */
+.tabs { display: flex; gap: 3px; background: var(--surface); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
+.tab { flex: 1; padding: 9px 4px; border: none; background: transparent; color: var(--text-muted); border-radius: 7px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: inherit; letter-spacing: 0.3px; text-transform: uppercase; transition: all 0.15s; }
+.tab.active { background: linear-gradient(135deg, #1a2f22, #162038); color: var(--green); border: 1px solid rgba(0,255,135,0.2); }
+
+/* ── CARDS ─────────────────────────────────────────────── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.card-accent { border-color: rgba(0,255,135,0.2); }
+.card-accent::after { content:''; position:absolute; top:0;left:0;right:0;height:1px; background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.scale-hint { background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.15); border-radius: 8px; padding: 10px 13px; font-size: 12px; color: rgba(0,229,255,0.8); margin-bottom: 18px; line-height: 1.6; }
+
+/* ── SCORE RINGS GRID ──────────────────────────────────── */
+.rings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.ring-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: default; }
+.ring-wrap { position: relative; width: 72px; height: 72px; }
+.ring-svg { width: 72px; height: 72px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+.ring-fg { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.4s cubic-bezier(.22,1,.36,1); }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-val { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1; }
+.ring-emoji { font-size: 10px; line-height: 1; }
+.ring-name { font-size: 10px; color: var(--text-muted); text-align: center; font-weight: 500; letter-spacing: 0.2px; }
+.ring-slider { width: 72px; -webkit-appearance: none; height: 3px; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
+.ring-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--green); cursor: pointer; box-shadow: 0 0 8px var(--green-glow); }
+
+/* Bottom row for recovery + toggle */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px; }
+.toggle-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+.toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 12px; transition: background 0.2s; cursor: pointer; }
+.toggle-wrap input:checked + .toggle-track { background: var(--amber); box-shadow: 0 0 10px rgba(255,204,0,0.3); }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: left 0.2s; pointer-events: none; }
+.toggle-wrap input:checked ~ .toggle-thumb { left: 23px; }
+.toggle-lbl { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+
+.note-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: inherit; resize: none; height: 64px; outline: none; margin-top: 14px; transition: border-color 0.15s; }
+.note-input:focus { border-color: rgba(0,255,135,0.4); }
+.note-input::placeholder { color: var(--text-muted); }
+
+/* ── SAVE BUTTON ─────────────────────────────────────── */
+.btn-save { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--green), var(--cyan)); color: #080a0e; border: none; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 14px; font-family: inherit; letter-spacing: 0.5px; text-transform: uppercase; position: relative; overflow: hidden; transition: opacity 0.15s, transform 0.1s; }
+.btn-save:active { transform: scale(0.98); }
+.btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-save::after { content:''; position:absolute; inset:0; background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent); }
+
+/* ── PRESSURE TRAINING ────────────────────────────────── */
+.rec-card { background: linear-gradient(135deg, rgba(0,255,135,0.08), rgba(0,229,255,0.06)); border: 1px solid rgba(0,255,135,0.2); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+.rec-eye { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: var(--green); text-transform: uppercase; margin-bottom: 3px; }
+.rec-name { font-size: 17px; font-weight: 700; }
+
+.cat-block { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+.cat-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; cursor: pointer; background: var(--surface2); user-select: none; transition: background 0.15s; }
+.cat-head:hover { background: #1f2635; }
+.cat-head-left { display: flex; align-items: center; gap: 8px; }
+.cat-title { font-size: 13px; font-weight: 600; }
+.cat-badge { font-size: 11px; color: var(--green); background: var(--green-dim); padding: 2px 7px; border-radius: 10px; }
+.cat-chev { color: var(--text-muted); font-size: 10px; transition: transform 0.2s; display: inline-block; }
+.cat-chev.open { transform: rotate(180deg); }
+.drill-list { background: var(--surface); padding: 4px 14px 8px; display: none; }
+.drill-list.open { display: block; }
+.drill-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.drill-item:last-child { border-bottom: none; }
+.drill-check { width: 19px; height: 19px; border: 2px solid var(--border); border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #080a0e; transition: all 0.15s; }
+.drill-check.on { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+.drill-text { font-size: 13px; color: var(--text-muted); transition: color 0.15s; }
+.drill-text.on { color: var(--text); }
+
+.drill-progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin: 0 15px 14px; overflow: hidden; }
+.drill-progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan)); border-radius: 2px; transition: width 0.4s cubic-bezier(.22,1,.36,1); }
+.drill-footer { display: flex; justify-content: space-between; align-items: center; padding: 13px 15px; background: var(--surface2); border-top: 1px solid var(--border); }
+.drill-total-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.drill-total-val { font-size: 22px; font-weight: 800; color: var(--green); }
+
+/* ── HISTORY ──────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+.stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 10px; text-align: center; }
+.stat-val { font-size: 26px; font-weight: 800; color: var(--green); letter-spacing: -1px; }
+.stat-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+.score-bars { display: flex; flex-direction: column; gap: 9px; }
+.sbar-row { display: flex; align-items: center; gap: 10px; }
+.sbar-lbl { font-size: 11px; color: var(--text-dim); width: 120px; flex-shrink: 0; }
+.sbar-track { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.sbar-fill { height: 100%; border-radius: 3px; transition: width 0.5s cubic-bezier(.22,1,.36,1); }
+.sbar-val { font-size: 12px; font-weight: 700; width: 26px; text-align: right; }
+
+.match-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.match-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.match-date { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.match-score { font-size: 22px; font-weight: 800; color: var(--green); letter-spacing: -0.5px; }
+.match-score-lbl { font-size: 10px; color: var(--text-muted); }
+.tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin: 2px 3px 0 0; font-weight: 600; }
+.tag-leak { background: rgba(255,61,90,0.1); border: 1px solid rgba(255,61,90,0.25); color: var(--red); }
+.tag-aggro { background: rgba(255,204,0,0.1); border: 1px solid rgba(255,204,0,0.25); color: var(--amber); }
+.match-note { font-size: 12px; color: var(--text-dim); margin-top: 6px; font-style: italic; }
+
+.trend-select { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 14px; }
+.trend-btn { padding: 5px 10px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.15s; }
+.trend-btn.active { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+/* ── ACHIEVEMENTS ─────────────────────────────────────── */
+.achievements-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.ach-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; transition: all 0.2s; }
+.ach-item.unlocked { border-color: rgba(0,255,135,0.3); background: rgba(0,255,135,0.05); }
+.ach-item.unlocked .ach-icon { filter: none; }
+.ach-icon { font-size: 26px; margin-bottom: 5px; filter: grayscale(1) opacity(0.35); transition: filter 0.3s; }
+.ach-name { font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.2px; }
+.ach-item.unlocked .ach-name { color: var(--green); }
+
+/* ── SAVE CELEBRATION ─────────────────────────────────── */
+.celebration { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: rgba(8,10,14,0.85); backdrop-filter: blur(4px); }
+.cel-box { background: var(--surface); border: 1px solid rgba(0,255,135,0.3); border-radius: 20px; padding: 36px 40px; text-align: center; animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1); max-width: 300px; position: relative; overflow: hidden; }
+.cel-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, var(--green), var(--cyan), var(--purple)); }
+.cel-emoji { font-size: 52px; margin-bottom: 12px; display: block; animation: bounce 0.6s ease infinite alternate; }
+.cel-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.cel-xp { font-size: 14px; color: var(--green); font-weight: 700; margin-bottom: 4px; }
+.cel-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.cel-ach { background: rgba(0,255,135,0.08); border: 1px solid rgba(0,255,135,0.2); border-radius: 10px; padding: 10px; margin-bottom: 16px; font-size: 13px; font-weight: 600; color: var(--green); }
+.cel-btn { padding: 12px 28px; background: linear-gradient(135deg, var(--green), var(--cyan)); color: #080a0e; border: none; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; letter-spacing: 0.5px; }
+
+@keyframes popIn { from { transform: scale(0.7); opacity:0; } to { transform: scale(1); opacity:1; } }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+/* ── TOAST ────────────────────────────────────────────── */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid rgba(0,255,135,0.25); color: var(--text); padding: 11px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 999; box-shadow: 0 8px 32px rgba(0,0,0,0.5); white-space: nowrap; }
+.hidden { display: none !important; }
+.loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+
+@media (max-width: 420px) {
+  .rings-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .ring-wrap { width: 64px; height: 64px; }
+  .ring-svg { width: 64px; height: 64px; }
+  .ring-slider { width: 64px; }
+  .achievements-grid { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-main">🎾 Mindset <span>20x10</span></div>
+      </div>
+      <div class="logo-sub" id="header-date"></div>
+    </div>
+
+    <!-- XP Hero -->
+    <div class="xp-hero">
+      <div class="xp-top">
+        <div class="level-badge">
+          <div class="level-icon" id="level-icon">🌱</div>
+          <div class="level-info">
+            <div class="level-name" id="level-name">Beginner</div>
+            <div class="level-num" id="level-num">Level 1</div>
+          </div>
+        </div>
+        <div class="xp-numbers">
+          <div class="xp-val" id="xp-val">0 XP</div>
+          <div class="xp-label" id="xp-next">Next: 100 XP</div>
+        </div>
+      </div>
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" id="xp-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Streak + stats -->
+    <div class="meta-row">
+      <div class="meta-pill streak-pill">
+        <div class="meta-pill-icon">🔥</div>
+        <div>
+          <div class="meta-pill-val" id="streak-val">0</div>
+          <div class="meta-pill-label">Day streak</div>
+        </div>
+      </div>
+      <div class="meta-pill">
+        <div class="meta-pill-icon">🏟</div>
+        <div>
+          <div class="meta-pill-val" id="matches-val">0</div>
+          <div class="meta-pill-label">Matches</div>
+        </div>
+      </div>
+      <div class="meta-pill">
+        <div class="meta-pill-icon">💪</div>
+        <div>
+          <div class="meta-pill-val" id="drills-val">0</div>
+          <div class="meta-pill-label">Drills done</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('log')">📋 Log match</button>
+    <button class="tab" onclick="switchTab('training')">🎯 Training</button>
+    <button class="tab" onclick="switchTab('history')">📊 History</button>
+    <button class="tab" onclick="switchTab('achievements')">🏆 Badges</button>
+  </div>
+
+  <!-- LOG MATCH -->
+  <div id="tab-log">
+    <div class="card card-accent">
+      <div class="card-title">🎯 Rate your match</div>
+      <div class="scale-hint">Rate what you actually did · 1–3 weak · 4–6 okay · 7–8 strong · 9–10 elite</div>
+      <div class="rings-grid" id="rings-grid"></div>
+      <div class="bottom-row">
+        <div id="ring-recovery-wrap"></div>
+        <div class="toggle-card">
+          <label class="toggle-wrap">
+            <input type="checkbox" id="toggle-aggro">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+          <label class="toggle-lbl" for="toggle-aggro">⚡ Too aggressive?</label>
+        </div>
+      </div>
+      <textarea class="note-input" id="match-note" placeholder="Optional note — e.g. Lost focus when ahead"></textarea>
+      <button class="btn-save" id="btn-save-match" onclick="saveMatch()">Save match →</button>
+    </div>
+  </div>
+
+  <!-- PRESSURE TRAINING -->
+  <div id="tab-training" class="hidden">
+    <div class="card card-accent">
+      <div class="card-title">🎯 Pressure Training</div>
+      <div class="rec-card">
+        <div class="rec-eye">🚀 Recommended today</div>
+        <div class="rec-name" id="rec-name">—</div>
+      </div>
+      <div id="drill-cats"></div>
+      <div class="drill-progress-bar"><div class="drill-progress-fill" id="drill-prog" style="width:0%"></div></div>
+      <div class="drill-footer">
+        <span class="drill-total-lbl">Drills completed</span>
+        <span class="drill-total-val" id="drill-count">0 / 32</span>
+      </div>
+      <button class="btn-save" id="btn-save-training" style="margin-top:14px" onclick="saveTraining()">Save session →</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="tab-history" class="hidden">
+    <div id="history-content"><div class="loading">Loading…</div></div>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div id="tab-achievements" class="hidden">
+    <div class="card">
+      <div class="card-title">🏆 Achievements</div>
+      <div class="achievements-grid" id="ach-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CELEBRATION OVERLAY -->
+<div class="celebration hidden" id="celebration">
+  <div class="cel-box">
+    <span class="cel-emoji" id="cel-emoji">🎉</span>
+    <div class="cel-title" id="cel-title">Match saved!</div>
+    <div class="cel-xp" id="cel-xp">+50 XP</div>
+    <div class="cel-sub" id="cel-sub">Keep building that mindset.</div>
+    <div class="cel-ach hidden" id="cel-ach"></div>
+    <button class="cel-btn" onclick="closeCelebration()">Let's go! 🚀</button>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<!-- WAKE-UP OVERLAY -->
+<div id="wakeup" style="
+  position:fixed;inset:0;z-index:300;
+  background:#080a0e;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;
+">
+  <div style="font-size:48px;animation:spinBounce 1.2s ease infinite alternate;">🎾</div>
+  <div style="font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.5px;">Mindset <span style="color:var(--green)">20x10</span></div>
+  <div style="width:200px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+    <div id="wake-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:2px;transition:width 0.3s ease;"></div>
+  </div>
+  <div id="wake-msg" style="font-size:12px;color:var(--text-muted);letter-spacing:0.3px;">Vækker databasen op…</div>
+</div>
+<style>
+@keyframes spinBounce {
+  0%   { transform: rotate(-15deg) scale(0.95); }
+  50%  { transform: rotate(10deg) scale(1.05); }
+  100% { transform: rotate(-5deg) scale(1); }
+}
+</style>
+
+<script>
+var SUPA_URL = 'https://ihckizmjdoosyoutzhrp.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloY2tpem1qZG9vc3lvdXR6aHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjM2MDcsImV4cCI6MjA5ODEzOTYwN30.V03yPYQvP3eHpI2L7o-L9ue67RVV_jC9iTnTtzaqyQI';
+
+async function db(path, opts) {
+  opts = opts || {};
+  var r = await fetch(SUPA_URL + '/rest/v1/' + path, {
+    method: opts.method || 'GET',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': opts.prefer || 'return=representation' },
+    body: opts.body
+  });
+  if (!r.ok) throw new Error(await r.text());
+  var t = await r.text(); return t ? JSON.parse(t) : null;
+}
+
+var METRICS = [
+  { key:'focus', label:'Focus', emoji:'🎯' },
+  { key:'margin', label:'Margin', emoji:'🎾' },
+  { key:'reset', label:'Reset', emoji:'🔄' },
+  { key:'intensity', label:'Intensity', emoji:'🔥' },
+  { key:'pressure_handling', label:'Pressure', emoji:'💎' },
+  { key:'arousal_regulation', label:'Arousal', emoji:'🧠' },
+  { key:'attention_control', label:'Attention', emoji:'🎪' },
+  { key:'identity_alignment', label:'Identity', emoji:'⚫' },
+  { key:'recovery_speed', label:'Recovery', emoji:'⏱' }
+];
+
+var DRILLS = [
+  { key:'closing', label:'Closing', items:['Close match from 5-3','Close game from 40-30','Match point, no free errors','Serve for match'] },
+  { key:'high_pressure', label:'High Pressure Points', items:['Deuce battle','Break point for you','Break point against you','Tie-break simulation'] },
+  { key:'error_control', label:'Error Control', items:['Reset after error within 1 point','Break 3-error spiral','Same cue after every mistake','No frustration game'] },
+  { key:'discipline', label:'Discipline / Boredom', items:['10 shots without error','Crosscourt only for one game','No winners for one game','Long rally discipline'] },
+  { key:'attention', label:'Attention Control', items:['Split-step anchor drill','Contact-point focus drill','One external cue for full game','Refocus after distraction'] },
+  { key:'arousal', label:'Arousal Regulation', items:['Raise energy before easy match','Calm down before closing','Breath reset before serve','Body-language reset drill'] },
+  { key:'identity', label:'Identity', items:['No free points challenge','Play one full game to identity','Identity cue before key points','Return to standard after momentum shift'] },
+  { key:'recovery', label:'Recovery Speed', items:['Next-ball response drill','Miss and reset within 1 point','Fast reset after partner error','Recover after lost deuce'] }
+];
+
+var LEVELS = [
+  { min:0, max:100, name:'Beginner', icon:'🌱', num:1 },
+  { min:100, max:250, name:'Contender', icon:'⚡', num:2 },
+  { min:250, max:500, name:'Fighter', icon:'🔥', num:3 },
+  { min:500, max:900, name:'Competitor', icon:'💎', num:4 },
+  { min:900, max:1500, name:'Warrior', icon:'⚔️', num:5 },
+  { min:1500, max:2500, name:'Champion', icon:'🏆', num:6 },
+  { min:2500, max:4000, name:'Elite', icon:'👑', num:7 },
+  { min:4000, max:99999, name:'Legend', icon:'🌟', num:8 }
+];
+
+var ACHIEVEMENTS = [
+  { id:'first_match', icon:'🎾', name:'First match', desc:'Log your first match', check: function(m,t){ return m>=1; } },
+  { id:'five_matches', icon:'⭐', name:'5 matches', desc:'Log 5 matches', check: function(m,t){ return m>=5; } },
+  { id:'ten_matches', icon:'🌟', name:'10 matches', desc:'Log 10 matches', check: function(m,t){ return m>=10; } },
+  { id:'first_drill', icon:'💪', name:'First drill', desc:'Complete a drill', check: function(m,t){ return t>=1; } },
+  { id:'drill_10', icon:'🎯', name:'10 drills', desc:'Complete 10 drills', check: function(m,t){ return t>=10; } },
+  { id:'drill_50', icon:'🏋️', name:'50 drills', desc:'Complete 50 drills', check: function(m,t){ return t>=50; } },
+  { id:'score_8', icon:'🔥', name:'On fire', desc:'Score 8+ avg in a match', check: function(m,t,matches){ return matches.some(function(x){ return matchAvg(x)>=8; }); } },
+  { id:'perfect', icon:'💯', name:'Elite mind', desc:'Score 9+ avg in a match', check: function(m,t,matches){ return matches.some(function(x){ return matchAvg(x)>=9; }); } },
+  { id:'xp500', icon:'👑', name:'500 XP', desc:'Reach 500 XP', check: function(m,t,matches,xp){ return xp>=500; } },
+  { id:'xp1000', icon:'🌟', name:'1000 XP', desc:'Reach 1000 XP', check: function(m,t,matches,xp){ return xp>=1000; } },
+  { id:'consistent', icon:'📈', name:'Consistent', desc:'Log 3 matches', check: function(m){ return m>=3; } },
+  { id:'streak3', icon:'🔥', name:'3-day streak', desc:'3 days in a row', check: function(m,t,matches){ return calcStreak(matches)>=3; } }
+];
+
+// State
+var sliderVals = {};
+var checkedDrills = {};
+var historyLoaded = false;
+var currentTrend = 'focus';
+var allMatches = [];
+var allSessions = [];
+
+function matchAvg(m) {
+  var keys = METRICS.map(function(x){ return x.key; });
+  var vals = keys.map(function(k){ return m[k]; }).filter(function(v){ return v != null; });
+  return vals.length ? vals.reduce(function(a,b){ return a+b; }, 0) / vals.length : 0;
+}
+
+function calcStreak(matches) {
+  if (!matches.length) return 0;
+  var dates = matches.map(function(m){ return new Date(m.created_at).toDateString(); });
+  var unique = [];
+  dates.forEach(function(d){ if (unique.indexOf(d) < 0) unique.push(d); });
+  unique.sort(function(a,b){ return new Date(b)-new Date(a); });
+  var streak = 1;
+  for (var i=1; i<unique.length; i++) {
+    var diff = (new Date(unique[i-1]) - new Date(unique[i])) / 86400000;
+    if (Math.abs(diff - 1) < 0.1) streak++; else break;
+  }
+  // Check if today or yesterday is in streak
+  var today = new Date().toDateString();
+  var yesterday = new Date(Date.now()-86400000).toDateString();
+  if (unique[0] !== today && unique[0] !== yesterday) return 0;
+  return streak;
+}
+
+function calcXP(matches, totalDrills) {
+  return matches.length * 50 + Math.floor(matchAvg({}) * 0) + totalDrills * 10 +
+    matches.reduce(function(s,m){ return s + Math.round(matchAvg(m)*5); }, 0);
+}
+
+function getLevel(xp) {
+  for (var i = LEVELS.length-1; i>=0; i--) {
+    if (xp >= LEVELS[i].min) return LEVELS[i];
+  }
+  return LEVELS[0];
+}
+
+function updateHeroUI(matches, totalDrills) {
+  var xp = calcXP(matches, totalDrills);
+  var lv = getLevel(xp);
+  var streak = calcStreak(matches);
+
+  document.getElementById('xp-val').textContent = xp + ' XP';
+  document.getElementById('level-name').textContent = lv.name;
+  document.getElementById('level-num').textContent = 'Level ' + lv.num;
+  document.getElementById('level-icon').textContent = lv.icon;
+  document.getElementById('xp-next').textContent = lv.max < 99999 ? 'Next: ' + lv.max + ' XP' : 'Max level!';
+  var pct = lv.max < 99999 ? ((xp - lv.min) / (lv.max - lv.min) * 100) : 100;
+  document.getElementById('xp-bar').style.width = Math.min(pct, 100) + '%';
+  document.getElementById('streak-val').textContent = streak;
+  document.getElementById('matches-val').textContent = matches.length;
+  document.getElementById('drills-val').textContent = totalDrills;
+}
+
+function ringColor(v) {
+  if (v >= 8) return '#00ff87';
+  if (v >= 6) return '#00e5ff';
+  if (v >= 4) return '#ffcc00';
+  return '#ff3d5a';
+}
+
+function buildRing(metric, isSmall) {
+  var val = sliderVals[metric.key] || 6;
+  var r = isSmall ? 28 : 30;
+  var circ = 2 * Math.PI * r;
+  var offset = circ - (val / 10) * circ;
+  var col = ringColor(val);
+  var size = isSmall ? 64 : 72;
+
+  return '<div class="ring-item">' +
+    '<div class="ring-wrap" style="width:' + size + 'px;height:' + size + 'px">' +
+    '<svg class="ring-svg" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" style="transform:rotate(-90deg)">' +
+    '<circle class="ring-bg" cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '"/>' +
+    '<circle class="ring-fg" id="ring-fg-' + metric.key + '" cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" stroke="' + col + '" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '"/>' +
+    '</svg>' +
+    '<div class="ring-center"><div class="ring-val" id="ring-val-' + metric.key + '">' + val + '</div></div>' +
+    '</div>' +
+    '<input type="range" class="ring-slider" min="1" max="10" value="' + val + '" style="width:' + size + 'px" oninput="updateRing(\'' + metric.key + '\',this.value)">' +
+    '<div class="ring-name">' + metric.emoji + ' ' + metric.label + '</div>' +
+    '</div>';
+}
+
+function updateRing(key, val) {
+  val = parseInt(val);
+  sliderVals[key] = val;
+  var r = 30;
+  if (key === 'recovery_speed') r = 28;
+  var circ = 2 * Math.PI * r;
+  var offset = circ - (val / 10) * circ;
+  var col = ringColor(val);
+  var fg = document.getElementById('ring-fg-' + key);
+  var vEl = document.getElementById('ring-val-' + key);
+  if (fg) { fg.setAttribute('stroke-dashoffset', offset); fg.setAttribute('stroke', col); }
+  if (vEl) vEl.textContent = val;
+}
+
+function buildDrills() {
+  var container = document.getElementById('drill-cats');
+  container.innerHTML = '';
+  DRILLS.forEach(function(cat) {
+    var block = document.createElement('div');
+    block.className = 'cat-block';
+    block.innerHTML = '<div class="cat-head" onclick="toggleCat(\'' + cat.key + '\')">' +
+      '<div class="cat-head-left"><span class="cat-title">' + cat.label + '</span>' +
+      '<span class="cat-badge hidden" id="catbadge-' + cat.key + '">0/4</span></div>' +
+      '<span class="cat-chev" id="chev-' + cat.key + '">▼</span></div>' +
+      '<div class="drill-list" id="dlist-' + cat.key + '">' +
+      cat.items.map(function(d) {
+        var did = 'dd-' + d.replace(/[^a-z0-9]/gi,'_');
+        checkedDrills[d] = false;
+        return '<div class="drill-item" onclick="toggleDrill(\'' + d.replace(/'/g,"\\'") + '\')">' +
+          '<div class="drill-check" id="dchk-' + did + '"></div>' +
+          '<span class="drill-text" id="dtxt-' + did + '">' + d + '</span></div>';
+      }).join('') + '</div>';
+    container.appendChild(block);
+  });
+}
+
+function toggleCat(key) {
+  document.getElementById('dlist-' + key).classList.toggle('open');
+  document.getElementById('chev-' + key).classList.toggle('open');
+}
+
+function toggleDrill(d) {
+  checkedDrills[d] = !checkedDrills[d];
+  var did = 'dd-' + d.replace(/[^a-z0-9]/gi,'_');
+  var chk = document.getElementById('dchk-' + did);
+  var txt = document.getElementById('dtxt-' + did);
+  if (checkedDrills[d]) { chk.classList.add('on'); chk.textContent='✓'; txt.classList.add('on'); }
+  else { chk.classList.remove('on'); chk.textContent=''; txt.classList.remove('on'); }
+  var total = Object.values(checkedDrills).filter(Boolean).length;
+  document.getElementById('drill-count').textContent = total + ' / 32';
+  document.getElementById('drill-prog').style.width = (total/32*100) + '%';
+  DRILLS.forEach(function(cat) {
+    var n = cat.items.filter(function(x){ return checkedDrills[x]; }).length;
+    var badge = document.getElementById('catbadge-' + cat.key);
+    if (n > 0) { badge.classList.remove('hidden'); badge.textContent = n+'/'+cat.items.length; }
+    else badge.classList.add('hidden');
+  });
+}
+
+function buildAchievements() {
+  var grid = document.getElementById('ach-grid');
+  grid.innerHTML = '';
+  var xp = calcXP(allMatches, allSessions.reduce(function(s,x){ return s+x.total_drills; }, 0));
+  var totalDrills = allSessions.reduce(function(s,x){ return s+x.total_drills; }, 0);
+  ACHIEVEMENTS.forEach(function(a) {
+    var unlocked = false;
+    try { unlocked = a.check(allMatches.length, totalDrills, allMatches, xp); } catch(e){}
+    var div = document.createElement('div');
+    div.className = 'ach-item' + (unlocked ? ' unlocked' : '');
+    div.innerHTML = '<div class="ach-icon">' + a.icon + '</div><div class="ach-name">' + a.name + '</div>';
+    div.title = a.desc;
+    grid.appendChild(div);
+  });
+}
+
+// ── TABS ──────────────────────────────────────────────────
+var TAB_IDS = ['log','training','history','achievements'];
+function switchTab(t) {
+  TAB_IDS.forEach(function(id) {
+    document.getElementById('tab-' + id).classList.toggle('hidden', id !== t);
+  });
+  document.querySelectorAll('.tab').forEach(function(btn, i) {
+    btn.classList.toggle('active', TAB_IDS[i] === t);
+  });
+  if (t === 'history' && !historyLoaded) { loadHistory(); historyLoaded = true; }
+  if (t === 'achievements') buildAchievements();
+}
+
+// ── SAVE MATCH ─────────────────────────────────────────────
+async function saveMatch() {
+  var btn = document.getElementById('btn-save-match');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    var payload = {};
+    METRICS.forEach(function(m) { payload[m.key] = sliderVals[m.key] || 6; });
+    payload.played_too_aggressive = document.getElementById('toggle-aggro').checked;
+    var note = document.getElementById('match-note').value.trim();
+    if (note) payload.note = note;
+    var saved = await db('match_logs', { method:'POST', body: JSON.stringify(payload) });
+    allMatches.unshift(saved && saved[0] ? saved[0] : payload);
+    var totalDrills = allSessions.reduce(function(s,x){ return s+(x.total_drills||0); }, 0);
+    updateHeroUI(allMatches, totalDrills);
+
+    // Check new achievements
+    var xp = calcXP(allMatches, totalDrills);
+    var newAch = checkNewAchievements(allMatches, totalDrills, xp);
+    var avg = matchAvg(payload);
+    showCelebration(avg, xp, newAch);
+
+    METRICS.forEach(function(m) {
+      sliderVals[m.key] = 6;
+      var s = document.querySelector('[oninput*="' + m.key + '"]');
+      if (s) s.value = 6;
+      updateRing(m.key, 6);
+    });
+    document.getElementById('toggle-aggro').checked = false;
+    document.getElementById('match-note').value = '';
+    historyLoaded = false;
+  } catch(e) { showToast('❌ ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Save match →';
+}
+
+// ── SAVE TRAINING ──────────────────────────────────────────
+async function saveTraining() {
+  var completed = Object.keys(checkedDrills).filter(function(d){ return checkedDrills[d]; });
+  if (!completed.length) { showToast('Vælg mindst én drill'); return; }
+  var btn = document.getElementById('btn-save-training');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    var session = { drills_completed: completed, total_drills: completed.length };
+    await db('training_sessions', { method:'POST', body: JSON.stringify(session) });
+    allSessions.unshift(session);
+    var totalDrills = allSessions.reduce(function(s,x){ return s+(x.total_drills||0); }, 0);
+    updateHeroUI(allMatches, totalDrills);
+    Object.keys(checkedDrills).forEach(function(d) { if (checkedDrills[d]) toggleDrill(d); });
+    showToast('✅ +' + (completed.length * 10) + ' XP — session gemt!');
+  } catch(e) { showToast('❌ ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Save session →';
+}
+
+// ── CELEBRATION ────────────────────────────────────────────
+var prevAchUnlocked = [];
+function checkNewAchievements(matches, totalDrills, xp) {
+  var newOnes = [];
+  ACHIEVEMENTS.forEach(function(a) {
+    var wasUnlocked = prevAchUnlocked.indexOf(a.id) >= 0;
+    var isUnlocked = false;
+    try { isUnlocked = a.check(matches.length, totalDrills, matches, xp); } catch(e){}
+    if (isUnlocked && !wasUnlocked) { newOnes.push(a); prevAchUnlocked.push(a.id); }
+    if (isUnlocked && prevAchUnlocked.indexOf(a.id) < 0) prevAchUnlocked.push(a.id);
+  });
+  return newOnes;
+}
+
+function showCelebration(avg, xp, newAchs) {
+  var cel = document.getElementById('celebration');
+  var emoji = avg >= 9 ? '🔥' : avg >= 7 ? '⚡' : avg >= 5 ? '✅' : '💪';
+  var title = avg >= 9 ? 'Elite performance!' : avg >= 7 ? 'Strong match!' : avg >= 5 ? 'Solid session!' : 'Keep grinding!';
+  var sub = avg >= 9 ? 'You were absolutely locked in.' : avg >= 7 ? 'Your mental game is leveling up.' : avg >= 5 ? 'Consistency is how champions are built.' : 'Every match builds the mindset.';
+  document.getElementById('cel-emoji').textContent = emoji;
+  document.getElementById('cel-title').textContent = title;
+  document.getElementById('cel-xp').textContent = '+50 XP · Total: ' + xp + ' XP';
+  document.getElementById('cel-sub').textContent = sub;
+  var achEl = document.getElementById('cel-ach');
+  if (newAchs.length) {
+    achEl.classList.remove('hidden');
+    achEl.textContent = '🏆 Badge unlocked: ' + newAchs.map(function(a){ return a.icon + ' ' + a.name; }).join(', ');
+  } else { achEl.classList.add('hidden'); }
+  cel.classList.remove('hidden');
+}
+
+function closeCelebration() {
+  document.getElementById('celebration').classList.add('hidden');
+}
+
+// ── HISTORY ────────────────────────────────────────────────
+async function loadHistory() {
+  var el = document.getElementById('history-content');
+  el.innerHTML = '<div class="loading">Loading history…</div>';
+  try {
+    var matches = await db('match_logs?order=created_at.desc&limit=30') || [];
+    allMatches = matches;
+    renderHistory(matches);
+  } catch(e) {
+    el.innerHTML = '<div class="loading" style="color:var(--red)">Fejl: ' + e.message + '</div>';
+  }
+}
+
+function metricAvgH(matches, key) {
+  var vals = matches.map(function(m){ return m[key]; }).filter(function(v){ return v != null; });
+  return vals.length ? vals.reduce(function(a,b){ return a+b; }, 0) / vals.length : 0;
+}
+function barColor(v) { return v<=4?'var(--red)':v<=6?'var(--amber)':'var(--green)'; }
+
+function renderHistory(matches) {
+  var el = document.getElementById('history-content');
+  if (!matches.length) {
+    el.innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--text-muted)"><div style="font-size:36px;margin-bottom:12px">📊</div>No matches yet.<br><small style="font-size:12px;margin-top:6px;display:block">Log your first match to see trends.</small></div>';
+    return;
+  }
+  var avgs = matches.map(matchAvg);
+  var globalAvg = (avgs.reduce(function(a,b){return a+b;},0)/avgs.length).toFixed(1);
+  var best = Math.max.apply(null,avgs).toFixed(1);
+  var allKeys = METRICS.map(function(m){ return m.key; });
+  var allLabels = METRICS.map(function(m){ return m.label; });
+  var metricsSorted = allKeys.map(function(k,i){ return { key:k, label:allLabels[i], avg:metricAvgH(matches,k) }; }).sort(function(a,b){ return a.avg-b.avg; });
+  var streak = calcStreak(matches);
+
+  var html = '<div class="stats-grid">' +
+    '<div class="stat-box"><div class="stat-val">' + matches.length + '</div><div class="stat-lbl">Matches</div></div>' +
+    '<div class="stat-box"><div class="stat-val">' + globalAvg + '</div><div class="stat-lbl">Avg score</div></div>' +
+    '<div class="stat-box"><div class="stat-val">' + best + '</div><div class="stat-lbl">Best</div></div>' +
+  '</div>';
+
+  // Radar
+  if (matches.length >= 2) {
+    var cx=140,cy=130,r=95,n=METRICS.length;
+    var angles = METRICS.map(function(_,i){ return (Math.PI*2*i/n)-Math.PI/2; });
+    var avgVals = METRICS.map(function(m){ return metricAvgH(matches.slice(0,5),m.key); });
+    var pts = avgVals.map(function(v,i){ return { x: cx+r*(v/10)*Math.cos(angles[i]), y: cy+r*(v/10)*Math.sin(angles[i]) }; });
+    var poly = pts.map(function(p){ return p.x+','+p.y; }).join(' ');
+    var grids = [0.25,0.5,0.75,1].map(function(f){ return '<circle cx="'+cx+'" cy="'+cy+'" r="'+(r*f)+'" fill="none" stroke="#232b38" stroke-width="1"/>'; }).join('');
+    var axes = angles.map(function(a){ return '<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+r*Math.cos(a))+'" y2="'+(cy+r*Math.sin(a))+'" stroke="#232b38"/>'; }).join('');
+    var lbls = METRICS.map(function(m,i){
+      var lx=cx+(r+20)*Math.cos(angles[i]), ly=cy+(r+20)*Math.sin(angles[i]);
+      var anchor=lx<cx-5?'end':lx>cx+5?'start':'middle';
+      return '<text x="'+lx+'" y="'+(ly+4)+'" text-anchor="'+anchor+'" fill="#5a6478" font-size="9" font-family="sans-serif">'+m.label+'</text>';
+    }).join('');
+    html += '<div class="card card-accent"><div class="card-title">📡 Mental radar — last 5 matches</div>' +
+      '<svg width="280" height="260" viewBox="0 0 280 260" style="display:block;margin:0 auto">'+grids+axes+
+      '<polygon points="'+poly+'" fill="rgba(0,255,135,0.12)" stroke="#00ff87" stroke-width="2"/>'+
+      '<polygon points="'+angles.map(function(a){ return (cx+r*Math.cos(a))+','+(cy+r*Math.sin(a)); }).join(' ')+'" fill="none" stroke="#232b38" stroke-width="1"/>'+
+      lbls+'</svg></div>';
+  }
+
+  // Leaks
+  html += '<div class="card"><div class="card-title">📉 Mental leaks</div><div class="score-bars">';
+  metricsSorted.slice(0,5).forEach(function(m) {
+    var avg=m.avg.toFixed(1), col=barColor(m.avg);
+    html += '<div class="sbar-row"><div class="sbar-lbl">'+m.label+'</div>' +
+      '<div class="sbar-track"><div class="sbar-fill" style="width:'+(m.avg/10*100)+'%;background:'+col+'"></div></div>' +
+      '<div class="sbar-val" style="color:'+col+'">'+avg+'</div></div>';
+  });
+  html += '</div></div>';
+
+  // Trend
+  if (matches.length >= 2) {
+    html += '<div class="card"><div class="card-title">📈 Trend over tid</div>' +
+      '<div class="trend-select" id="trend-select"></div>' +
+      '<canvas id="trend-canvas" height="140"></canvas></div>';
+  }
+
+  // Log
+  html += '<div class="card"><div class="card-title">📋 Match log</div><div style="margin-top:10px">';
+  matches.slice(0,10).forEach(function(m) {
+    var avg=matchAvg(m).toFixed(1);
+    var leaks=allKeys.filter(function(k){ return m[k]&&m[k]<=4; }).map(function(k){ return allLabels[allKeys.indexOf(k)]; });
+    var dateStr=new Date(m.created_at).toLocaleDateString('da',{weekday:'short',day:'numeric',month:'short'});
+    html += '<div class="match-entry"><div class="match-head"><div>' +
+      '<div class="match-date">'+dateStr+'</div>' +
+      leaks.map(function(l){ return '<span class="tag tag-leak">'+l+'</span>'; }).join('') +
+      (m.played_too_aggressive?'<span class="tag tag-aggro">⚡ Aggressive</span>':'') +
+      (m.note?'<div class="match-note">"'+m.note+'"</div>':'') +
+      '</div><div style="text-align:right"><div class="match-score">'+avg+'</div><div class="match-score-lbl">/ 10</div></div></div>' +
+      '<div class="score-bars">';
+    METRICS.slice(0,4).forEach(function(met){
+      var v=m[met.key]||0, col=barColor(v);
+      html += '<div class="sbar-row"><div class="sbar-lbl" style="width:95px">'+met.label+'</div>' +
+        '<div class="sbar-track"><div class="sbar-fill" style="width:'+(v/10*100)+'%;background:'+col+'"></div></div>' +
+        '<div class="sbar-val" style="color:'+col+'">'+v+'</div></div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div></div>';
+
+  el.innerHTML = html;
+
+  if (matches.length >= 2) {
+    buildTrendBtns(matches);
+    drawTrend(matches, currentTrend);
+  }
+}
+
+function buildTrendBtns(matches) {
+  var el = document.getElementById('trend-select');
+  if (!el) return;
+  METRICS.forEach(function(m) {
+    var btn = document.createElement('button');
+    btn.className = 'trend-btn' + (m.key === currentTrend ? ' active' : '');
+    btn.textContent = m.emoji + ' ' + m.label;
+    btn.onclick = function() {
+      currentTrend = m.key;
+      document.querySelectorAll('.trend-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      drawTrend(matches, m.key);
+    };
+    el.appendChild(btn);
+  });
+}
+
+function drawTrend(matches, key) {
+  var canvas = document.getElementById('trend-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W = Math.max(canvas.parentElement.clientWidth - 36, 200);
+  canvas.width = W; canvas.height = 140;
+  var data = matches.slice().reverse().slice(-10).map(function(m) {
+    return { v: m[key]||0, lbl: new Date(m.created_at).toLocaleDateString('da',{day:'numeric',month:'short'}) };
+  });
+  var pad = {t:10,r:10,b:28,l:24};
+  var cw = W-pad.l-pad.r, ch = 140-pad.t-pad.b;
+  ctx.clearRect(0,0,W,140);
+  [2,4,6,8,10].forEach(function(v) {
+    var y=pad.t+ch-(v/10)*ch;
+    ctx.strokeStyle='#1a2030'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+    ctx.fillStyle='#5a6478'; ctx.font='9px sans-serif'; ctx.textAlign='right';
+    ctx.fillText(v, pad.l-3, y+3);
+  });
+  if (data.length < 2) return;
+  var step = cw/(data.length-1);
+  var pts = data.map(function(d,i){ return { x:pad.l+i*step, y:pad.t+ch-(d.v/10)*ch }; });
+  var grad = ctx.createLinearGradient(0,pad.t,0,pad.t+ch);
+  grad.addColorStop(0,'rgba(0,255,135,0.25)'); grad.addColorStop(1,'rgba(0,255,135,0)');
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pad.t+ch);
+  pts.forEach(function(p){ ctx.lineTo(p.x,p.y); });
+  ctx.lineTo(pts[pts.length-1].x,pad.t+ch);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.strokeStyle='#00ff87'; ctx.lineWidth=2;
+  pts.forEach(function(p,i){ i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); });
+  ctx.stroke();
+  pts.forEach(function(p,i) {
+    ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2);
+    ctx.fillStyle='#00ff87'; ctx.fill();
+    ctx.fillStyle='#080a0e'; ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill();
+  });
+  ctx.fillStyle='#5a6478'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+  data.forEach(function(d,i){ if(data.length<=6||i%2===0) ctx.fillText(d.lbl, pts[i].x, 140-6); });
+}
+
+// ── TOAST ──────────────────────────────────────────────────
+var toastT;
+function showToast(msg) {
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.classList.remove('hidden');
+  clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.add('hidden'); },2800);
+}
+
+// ── WAKE-UP & INIT ─────────────────────────────────────────
+function setWakeMsg(msg, pct) {
+  document.getElementById('wake-msg').textContent = msg;
+  document.getElementById('wake-bar').style.width = pct + '%';
+}
+
+function hideWakeup() {
+  var el = document.getElementById('wakeup');
+  el.style.transition = 'opacity 0.4s ease';
+  el.style.opacity = '0';
+  setTimeout(function(){ el.style.display = 'none'; }, 420);
+}
+
+async function wakeAndInit() {
+  var d = new Date();
+  document.getElementById('header-date').textContent = d.toLocaleDateString('da',{day:'numeric',month:'short',year:'numeric'});
+  METRICS.forEach(function(m){ sliderVals[m.key]=6; });
+
+  // Build UI immediately (behind overlay)
+  var grid = document.getElementById('rings-grid');
+  METRICS.slice(0,8).forEach(function(m){ grid.innerHTML += buildRing(m,false); });
+  document.getElementById('ring-recovery-wrap').innerHTML = buildRing(METRICS[8],true);
+  document.getElementById('rec-name').textContent = DRILLS[new Date().getDay()%DRILLS.length].label;
+  buildDrills();
+
+  // Wake-up: ping with timeout to detect cold start
+  setWakeMsg('Vækker databasen op…', 15);
+  var t0 = Date.now();
+  var woke = false;
+
+  try {
+    // First ping — may be slow if DB was sleeping
+    await db('match_logs?limit=1&select=id');
+    woke = true;
+  } catch(e) {
+    // If first ping fails, try once more
+    setWakeMsg('Forsøger igen…', 30);
+    try { await db('match_logs?limit=1&select=id'); woke = true; } catch(e2) {}
+  }
+
+  var elapsed = Date.now() - t0;
+  if (elapsed > 2000) {
+    // Was sleeping — show it woke up
+    setWakeMsg('Database vågnet! 🟢', 70);
+  } else {
+    setWakeMsg('Forbundet ✓', 70);
+  }
+
+  // Now load real data
+  setWakeMsg('Henter dine data…', 85);
+  try {
+    var results = await Promise.all([
+      db('match_logs?order=created_at.desc&limit=100').catch(function(){ return []; }),
+      db('training_sessions?order=created_at.desc&limit=100').catch(function(){ return []; })
+    ]);
+    allMatches = results[0] || [];
+    allSessions = results[1] || [];
+    var totalDrills = allSessions.reduce(function(s,x){ return s+(x.total_drills||0); },0);
+    updateHeroUI(allMatches, totalDrills);
+    var xp = calcXP(allMatches, totalDrills);
+    ACHIEVEMENTS.forEach(function(a) {
+      try { if (a.check(allMatches.length, totalDrills, allMatches, xp)) prevAchUnlocked.push(a.id); } catch(e){}
+    });
+  } catch(e) {}
+
+  setWakeMsg('Klar! 🎾', 100);
+  setTimeout(hideWakeup, 300);
+}
+
+wakeAndInit();
+</script>
+</body>
+</html>
