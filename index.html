@@ -502,11 +502,11 @@ function ringColor(v) {
 
 function buildRing(metric, isSmall) {
   var val = sliderVals[metric.key] || 6;
-  var r = isSmall ? 28 : 30;
+  var r = 30;
   var circ = 2 * Math.PI * r;
   var offset = circ - (val / 10) * circ;
   var col = ringColor(val);
-  var size = isSmall ? 64 : 72;
+  var size = 72;
 
   return '<div class="ring-item">' +
     '<div class="ring-wrap" style="width:' + size + 'px;height:' + size + 'px">' +
@@ -525,7 +525,6 @@ function updateRing(key, val) {
   val = parseInt(val);
   sliderVals[key] = val;
   var r = 30;
-  if (key === 'recovery_speed') r = 28;
   var circ = 2 * Math.PI * r;
   var offset = circ - (val / 10) * circ;
   var col = ringColor(val);
