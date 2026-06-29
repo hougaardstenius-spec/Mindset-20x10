@@ -1,0 +1,18 @@
+{
+  "name": "Mindset 20x10",
+  "short_name": "Mindset 20x10",
+  "description": "Mental performance system for padel",
+  "start_url": "/Mindset-20x10/",
+  "display": "standalone",
+  "background_color": "#080a0e",
+  "theme_color": "#080a0e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
